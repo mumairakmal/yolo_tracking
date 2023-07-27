@@ -134,7 +134,7 @@ class StrongSortKalmanFilterAdapter(KalmanFilter):
 
         return self.x, self.P
 
-    def gating_distance(self, measurements, only_position=False):
+    def gating_distance(self, measurements, only_position=True):
         """Compute gating distance between state distribution and measurements.
         A suitable distance threshold can be obtained from `chi2inv95`. If
         `only_position` is False, the chi-square distribution has 4 degrees of
@@ -157,13 +157,16 @@ class StrongSortKalmanFilterAdapter(KalmanFilter):
         """
 
         squared_maha = np.zeros((measurements.shape[0],))
+        euclidean_dist = np.zeros((measurements.shape[0],))
         for i, measurement in enumerate(measurements):
             if not only_position:
                 squared_maha[i] = super().md_for_measurement(measurement)
+                euclidean_dist[i] = super().ed_for_measurement(measurement)
             else:
                 # TODO (henriksod): Needs to be tested!
                 z = reshape_z(measurements, self.dim_z, 2)
                 H = self.H[:2, :2]
                 y = z - np.dot(H, self.x[:2])
                 squared_maha[i] = np.sqrt(float(np.dot(np.dot(y.T, self.SI[:2, :2]), y)))
-        return squared_maha
+                euclidean_dist[i] = np.sqrt(np.sum(y*y, axis = 1))
+        return squared_maha, euclidean_dist

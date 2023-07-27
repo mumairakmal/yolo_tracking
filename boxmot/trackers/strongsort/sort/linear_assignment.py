@@ -152,7 +152,7 @@ def gate_cost_matrix(
     detection_indices,
     mc_lambda,
     gated_cost=INFTY_COST,
-    only_position=False,
+    only_position=True,
 ):
     """Invalidate infeasible entries in cost matrix based on the state
     distributions obtained by Kalman filtering.
@@ -187,12 +187,14 @@ def gate_cost_matrix(
     """
     gating_dim = 2 if only_position else 4
     gating_threshold = chi2inv95[gating_dim]
-    measurements = np.asarray([detections[i].to_xyah() for i in detection_indices])
+    euclidean_threshold = 100.0
+    measurements = np.asarray(
+        [detections[i].to_xyah() for i in detection_indices])
     for row, track_idx in enumerate(track_indices):
         track = tracks[track_idx]
-        gating_distance = track.kf.gating_distance(measurements, only_position)
+        gating_distance, euclidean_distance = track.kf.gating_distance(track.mean, track.covariance, measurements, only_position)
+        gated_indices = (gating_distance < gating_threshold) & (euclidean_distance > euclidean_threshold)
         cost_matrix[row, gating_distance > gating_threshold] = gated_cost
-        cost_matrix[row] = (
-            mc_lambda * cost_matrix[row] + (1 - mc_lambda) * gating_distance
-        )
+        cost_matrix[row, gated_indices] = gated_cost
+        cost_matrix[row] = mc_lambda * cost_matrix[row] + (1 - mc_lambda) *  gating_distance
     return cost_matrix

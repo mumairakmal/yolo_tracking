@@ -584,6 +584,17 @@ class KalmanFilter(object):
         y = z - dot(H, self.x)
         md = sqrt(float(dot(dot(y.T, self.SI), y)))
         return md
+    
+    def ed_for_measurement(self, z):
+        """Euclidean distance for any measurement.
+
+        Should be run after a prediction() call.
+        """
+        z = reshape_z(z, self.dim_z, self.x.ndim)
+        H = self.H
+        y = z - dot(H, self.x)
+        ed = np.sqrt(np.sum(y*y, axis = 1))
+        return ed
 
     def predict_steadystate(self, u=0, B=None):
         """
