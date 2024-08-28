@@ -1,10 +1,21 @@
+# ecc: true
+# ema_alpha: 0.8962157769329083
+# max_age: 40
+# max_dist: 0.1594374041012136
+# max_iou_dist: 0.5431835667667874
+# max_unmatched_preds: 0
+# mc_lambda: 0.995
+# n_init: 3
+# nn_budget: 100
+# conf_thres: 0.5122620708221085
+
 ecc: true
 ema_alpha: 0.8962157769329083
-max_age: 40
-max_dist: 0.1594374041012136
-max_iou_dist: 0.5431835667667874
+max_age: 15 #4 for v2 #40 for v1
+max_dist: 1.5 #5 this is working good #0.1594374041012136 
+max_iou_dist: 0.99 #0.5431835667667874
 max_unmatched_preds: 0
-mc_lambda: 0.995
+mc_lambda: 0.5 #0.995
 n_init: 3
 nn_budget: 100
 conf_thres: 0.5122620708221085
